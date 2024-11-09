@@ -1,7 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-import os
 import requests
+import os
+import re
 
 load_dotenv()
 
