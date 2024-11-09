@@ -10,7 +10,7 @@
     <div class="container">
         <h1>Code Reviews, Simplified</h1>
         <h2>Enter GitHub Pull Request URL</h2>
-        <form action="{{ url_for('view_pr_insights') }}" method="post" class="search-bar">
+        <form action="{{ url_for('view_insights') }}" method="post" class="search-bar">
             <input type="url" id="pr_url" name="pr_url" placeholder="https://github.com/owner/repo/pull/123" required>
             <button type="submit">Get Insights</button>
         </form>

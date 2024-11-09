@@ -32,7 +32,32 @@
                     <p><strong>Additions:</strong> {{ file.additions }}, 
                        <strong>Deletions:</strong> {{ file.deletions }}, 
                        <strong>Changes:</strong> {{ file.changes }}</p>
-                    <pre class="diff">{{ file.patch }}</pre>
+        
+                    {% if file.patch %}
+                        <table class="diff-view">
+                            <tbody>
+                                {% for line in file.lines %}
+                                    <tr class="diff-line {{ line.type }}">
+                                        <!-- Left column for old line numbers -->
+                                        <td class="line-number">{{ line.old_line_num }}</td>
+                        
+                                        <!-- Right column for new line numbers -->
+                                        <td class="line-number">{{ line.new_line_num }}</td>
+                        
+                                        <!-- Line content -->
+                                        <td class="line-content">
+                                            <span class="line-marker">
+                                                {% if line.type == "addition" %}+{% elif line.type == "deletion" %}-{% else %} {% endif %}
+                                            </span>
+                                            {{ line.content[1:] }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="no-diff">Diff not available for this file.</p>
+                    {% endif %}
                 </div>
                 <hr>
             {% endfor %}
@@ -40,27 +65,3 @@
     </div>
 </body>
 </html>
-
-
-
-<!-- <body>
-    <h1>PR Insights for {{ pr_url }}</h1>
-    
-    {% if pr_files %}
-        <ul>
-            {% for file in pr_files %}
-                <li>
-                    <strong>File:</strong> {{ file.filename }}<br>
-                    <strong>Status:</strong> {{ file.status }}<br>
-                    <strong>Additions:</strong> {{ file.additions }}<br>
-                    <strong>Deletions:</strong> {{ file.deletions }}<br>
-                    <strong>Changes:</strong> {{ file.changes }}<br>
-                    <pre>{{ file.patch }}</pre>
-                </li>
-                <hr>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No files found in this pull request.</p>
-    {% endif %}
-</body> -->

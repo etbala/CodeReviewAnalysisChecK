@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 from dotenv import load_dotenv
 import requests
 import os
@@ -16,7 +16,14 @@ HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
 def get_pr_files(owner, repo, pr_number):
     url = f"{GITHUB_API_URL}/repos/{owner}/{repo}/pulls/{pr_number}/files"
     response = requests.get(url, headers=HEADERS)
-    return response.json() if response.status_code == 200 else {"error": "PR data not found"}
+    files_data = response.json() if response.status_code == 200 else {"error": "PR data not found"}
+
+    # Process line numbers for each file's patch
+    for file in files_data:
+        if "patch" in file:
+            file["lines"] = process_patch(file["patch"])
+
+    return files_data
 
 def get_pr_data(owner, repo, pr_number):
     pr_url = f"{GITHUB_API_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
@@ -28,13 +35,60 @@ def get_repo_data(owner, repo):
     response = requests.get(repo_url, headers=HEADERS)
     return response.json() if response.status_code == 200 else {"error": "Repo data not found"}
 
+def process_patch(patch):
+    lines = []
+    old_line_num = 0
+    new_line_num = 0
+
+    for line in patch.splitlines():
+        # Check if the line is a line number header like "@ -190,4 +190,4 @@"
+        header_match = re.match(r"^@@ -(\d+),\d+ \+(\d+),\d+ @@", line)
+        if header_match:
+            # Set initial line numbers from the header
+            old_line_num = int(header_match.group(1)) - 1
+            new_line_num = int(header_match.group(2)) - 1
+            continue  # Skip this line in the output
+
+        # Skip lines with "No newline at end of file"
+        if line.strip() == "\\ No newline at end of file":
+            continue  # Ignore this line
+
+        line_type = ""
+
+        if line.startswith('+'):
+            new_line_num += 1
+            line_type = "addition"
+            old_line_display = ""
+            new_line_display = new_line_num
+        elif line.startswith('-'):
+            old_line_num += 1
+            line_type = "deletion"
+            old_line_display = old_line_num
+            new_line_display = ""
+        else:
+            old_line_num += 1
+            new_line_num += 1
+            line_type = "context"
+            old_line_display = old_line_num
+            new_line_display = new_line_num
+
+        # Append the processed line data to the list
+        lines.append({
+            "content": line,
+            "type": line_type,
+            "old_line_num": old_line_display,
+            "new_line_num": new_line_display
+        })
+
+    return lines
+
 # Home page
 @app.route('/')
 def homepage():
     return render_template('home.html')
 
-@app.route('/pr-insights', methods=['POST'])
-def view_pr_insights():
+@app.route('/insights', methods=['POST'])
+def view_insights():
     pr_url = request.form.get("pr_url")
     match = re.match(r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)", pr_url)
     if not match:
