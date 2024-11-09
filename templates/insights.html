@@ -6,6 +6,44 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/insights.css') }}">
 </head>
 <body>
+    <div class="container">
+        <!-- PR Summary and General Info -->
+        <div class="pr-summary">
+            <div class="org-info">
+                <img src="{{ org_logo }}" alt="Organization Logo" class="org-logo">
+                <div class="org-details">
+                    <h2>
+                        <a href="{{ org_url }}" target="_blank">{{ org_name }}</a> / 
+                        <a href="{{ repo_url }}" target="_blank">{{ repo_name }}</a>
+                    </h2>
+                    <p><strong>Pull Request #{{ pr_number }}:</strong> {{ pr_title }}</p>
+                </div>
+            </div>
+            <a href="{{ pr_link }}" target="_blank" class="view-pr-link">View Pull Request</a>
+        </div>
+
+        <!-- File Changes Section -->
+        <div class="file-changes">
+            <h3>Files Changed</h3>
+            {% for file in pr_files %}
+                <div class="file-diff">
+                    <h4>{{ file.filename }}</h4>
+                    <p><strong>Status:</strong> {{ file.status }}</p>
+                    <p><strong>Additions:</strong> {{ file.additions }}, 
+                       <strong>Deletions:</strong> {{ file.deletions }}, 
+                       <strong>Changes:</strong> {{ file.changes }}</p>
+                    <pre class="diff">{{ file.patch }}</pre>
+                </div>
+                <hr>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+<!-- <body>
     <h1>PR Insights for {{ pr_url }}</h1>
     
     {% if pr_files %}
@@ -25,5 +63,4 @@
     {% else %}
         <p>No files found in this pull request.</p>
     {% endif %}
-</body>
-</html>
+</body> -->

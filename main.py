@@ -14,56 +14,19 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
 
 def get_pr_files(owner, repo, pr_number):
-    """
-    Fetches the list of files (with diffs) for a given PR from GitHub.
-    """
     url = f"{GITHUB_API_URL}/repos/{owner}/{repo}/pulls/{pr_number}/files"
     response = requests.get(url, headers=HEADERS)
+    return response.json() if response.status_code == 200 else {"error": "PR data not found"}
 
-    if response.status_code != 200:
-        return {"error": f"GitHub API request failed with status code {response.status_code}"}
+def get_pr_data(owner, repo, pr_number):
+    pr_url = f"{GITHUB_API_URL}/repos/{owner}/{repo}/pulls/{pr_number}"
+    response = requests.get(pr_url, headers=HEADERS)
+    return response.json() if response.status_code == 200 else {"error": "PR data not found"}
 
-    # Extract relevant information (diffs) from each file in the PR
-    files = response.json()
-    pr_data = []
-    for file in files:
-        pr_data.append({
-            "filename": file["filename"],
-            "status": file["status"],
-            "additions": file["additions"],
-            "deletions": file["deletions"],
-            "changes": file["changes"],
-            "patch": file.get("patch")  # Contains the actual diff
-        })
-    
-    return pr_data
-
-@app.route('/fetch-pr-diffs', methods=['POST'])
-def fetch_pr_diffs():
-    """
-    Accepts a GitHub PR URL, parses it, and fetches PR diffs from GitHub.
-    """
-    data = request.get_json()
-    pr_url = data.get("pr_url")
-
-    # Validate and parse the PR URL
-    match = re.match(r"https://github.com/([^/]+)/([^/]+)/pulls/(\d+)", pr_url)
-    if not match:
-        return jsonify({"error": "Invalid GitHub PR URL format"}), 400
-
-    owner, repo, pr_number = match.groups()
-
-    # Fetch PR files with diffs
-    pr_files = get_pr_files(owner, repo, pr_number)
-    
-    # If GitHub API request failed, return error
-    if "error" in pr_files:
-        return jsonify(pr_files), 500
-    
-    return jsonify({
-        "pr_url": pr_url,
-        "files": pr_files
-    })
+def get_repo_data(owner, repo):
+    repo_url = f"{GITHUB_API_URL}/repos/{owner}/{repo}"
+    response = requests.get(repo_url, headers=HEADERS)
+    return response.json() if response.status_code == 200 else {"error": "Repo data not found"}
 
 # Home page
 @app.route('/')
@@ -73,19 +36,36 @@ def homepage():
 @app.route('/pr-insights', methods=['POST'])
 def view_pr_insights():
     pr_url = request.form.get("pr_url")
-    
-    # Validate and parse the PR URL
     match = re.match(r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)", pr_url)
     if not match:
-        return jsonify({"error": "Invalid GitHub PR URL format"}), 400
-    
+        return {"error": "Invalid GitHub PR URL format"}, 400
+
     owner, repo, pr_number = match.groups()
+    pr_data = get_pr_data(owner, repo, pr_number)
+    repo_data = get_repo_data(owner, repo)
     pr_files = get_pr_files(owner, repo, pr_number)
-    
-    if "error" in pr_files:
-        return jsonify(pr_files), 500
-    
-    return render_template("insights.html", pr_url=pr_url, pr_files=pr_files)
+
+    # Extract necessary details
+    org_name = repo_data.get("owner", {}).get("login", "Unknown Org")
+    org_logo = repo_data.get("owner", {}).get("avatar_url", "")
+    org_url = repo_data.get("owner", {}).get("html_url", "")
+    repo_name = repo_data.get("name", "Unknown Repo")
+    repo_url = repo_data.get("html_url", "")
+    pr_title = pr_data.get("title", "PR title unavailable")
+    pr_number = pr_data.get("number", "")
+    pr_link = pr_data.get("html_url", "")
+
+    # Pass data to the template
+    return render_template("insights.html",
+                           org_name=org_name,
+                           org_logo=org_logo,
+                           org_url=org_url,
+                           repo_name=repo_name,
+                           repo_url=repo_url,
+                           pr_title=pr_title,
+                           pr_number=pr_number,
+                           pr_link=pr_link,
+                           pr_files=pr_files)
 
 if __name__ == "__main__":
     app.run(debug=False)
