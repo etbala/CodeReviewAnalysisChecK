@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PR Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/insights.css') }}">
+</head>
+<body>
+    <h1>PR Insights for {{ pr_url }}</h1>
+    
+    {% if pr_files %}
+        <ul>
+            {% for file in pr_files %}
+                <li>
+                    <strong>File:</strong> {{ file.filename }}<br>
+                    <strong>Status:</strong> {{ file.status }}<br>
+                    <strong>Additions:</strong> {{ file.additions }}<br>
+                    <strong>Deletions:</strong> {{ file.deletions }}<br>
+                    <strong>Changes:</strong> {{ file.changes }}<br>
+                    <pre>{{ file.patch }}</pre>
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No files found in this pull request.</p>
+    {% endif %}
+</body>
+</html>

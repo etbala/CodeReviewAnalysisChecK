@@ -1,9 +1,17 @@
-{% extends "layout.html" %}
-
-{% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-<h1> Hello This Is the Front Page To The Soon To Be Biggest Startup </h1>
-{% endblock head %}
-
-{% block content %}
-{% endblock content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home - PR Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+<body>
+    <h1>Welcome to the Future Biggest Startup!</h1>
+    <h2>Enter GitHub Pull Request URL</h2>
+    <form action="{{ url_for('view_pr_insights') }}" method="post">
+        <label for="pr_url">Pull Request URL:</label>
+        <input type="url" id="pr_url" name="pr_url" required>
+        <button type="submit">Get Insights</button>
+    </form>
+</body>
+</html>

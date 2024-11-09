@@ -47,7 +47,7 @@ def fetch_pr_diffs():
     pr_url = data.get("pr_url")
 
     # Validate and parse the PR URL
-    match = re.match(r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)", pr_url)
+    match = re.match(r"https://github.com/([^/]+)/([^/]+)/pulls/(\d+)", pr_url)
     if not match:
         return jsonify({"error": "Invalid GitHub PR URL format"}), 400
 
@@ -65,11 +65,27 @@ def fetch_pr_diffs():
         "files": pr_files
     })
 
-
-if __name__ == "__main__":
-    app.run(debug=False)
-
 # Home page
 @app.route('/')
 def homepage():
     return render_template('home.html')
+
+@app.route('/pr-insights', methods=['POST'])
+def view_pr_insights():
+    pr_url = request.form.get("pr_url")
+    
+    # Validate and parse the PR URL
+    match = re.match(r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)", pr_url)
+    if not match:
+        return jsonify({"error": "Invalid GitHub PR URL format"}), 400
+    
+    owner, repo, pr_number = match.groups()
+    pr_files = get_pr_files(owner, repo, pr_number)
+    
+    if "error" in pr_files:
+        return jsonify(pr_files), 500
+    
+    return render_template("results.html", pr_url=pr_url, pr_files=pr_files)
+
+if __name__ == "__main__":
+    app.run(debug=False)
