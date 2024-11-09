@@ -1,0 +1,116 @@
+/* Full-screen background and dark theme */
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    overflow: hidden;
+}
+
+/* Background animation */
+.background-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a1a, #333333, #121212);
+    background-size: 300% 300%;
+    animation: gradientAnimation 100s ease infinite;
+    z-index: -1;
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Center container */
+.container {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.5em;
+    color: #bbbbbb;
+    margin-bottom: 20px;
+}
+
+/* Search bar styling */
+.search-bar {
+    display: flex;
+    border-radius: 30px;
+    overflow: hidden;
+    background: #333;
+    border: 1px solid #444;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease;
+}
+
+.search-bar:hover {
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Input styling */
+.search-bar input[type="url"] {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 1em;
+    color: #ffffff;
+    background: #333;
+    border: none;
+    outline: none;
+}
+
+.search-bar input[type="url"]::placeholder {
+    color: #aaaaaa;
+}
+
+/* Button styling */
+.search-bar button {
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: #ffffff;
+    background: #555;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.search-bar button:hover {
+    background: #666;
+}
+
+.search-bar button:active {
+    background: #777;
+}
+
+/* Make the form responsive */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    .search-bar input[type="url"], .search-bar button {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+}

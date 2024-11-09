@@ -85,7 +85,7 @@ def view_pr_insights():
     if "error" in pr_files:
         return jsonify(pr_files), 500
     
-    return render_template("results.html", pr_url=pr_url, pr_files=pr_files)
+    return render_template("insights.html", pr_url=pr_url, pr_files=pr_files)
 
 if __name__ == "__main__":
     app.run(debug=False)
