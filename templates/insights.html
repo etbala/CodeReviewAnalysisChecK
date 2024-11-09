@@ -22,6 +22,12 @@
             <a href="{{ pr_link }}" target="_blank" class="view-pr-link">View Pull Request</a>
         </div>
 
+        <!-- PR Summary Display -->
+        <div class="pr-summary-details">
+            <h3>Summary of Changes</h3>
+            <div>{{ pr_summary | safe }}</div> <!-- Display the pr_summary content here -->
+        </div>
+
         <!-- File Changes Section -->
         <div class="file-changes">
             <h3>Files Changed</h3>

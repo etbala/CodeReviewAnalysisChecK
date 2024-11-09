@@ -4,6 +4,8 @@ import requests
 import os
 import re
 
+from ai import get_summary
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -99,6 +101,8 @@ def view_insights():
     repo_data = get_repo_data(owner, repo)
     pr_files = get_pr_files(owner, repo, pr_number)
 
+    pr_summary = get_summary(pr_files)
+
     # Extract necessary details
     org_name = repo_data.get("owner", {}).get("login", "Unknown Org")
     org_logo = repo_data.get("owner", {}).get("avatar_url", "")
@@ -119,7 +123,8 @@ def view_insights():
                            pr_title=pr_title,
                            pr_number=pr_number,
                            pr_link=pr_link,
-                           pr_files=pr_files)
+                           pr_files=pr_files,
+                           pr_summary=pr_summary)
 
 if __name__ == "__main__":
     app.run(debug=False)
