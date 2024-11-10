@@ -56,6 +56,14 @@
                                                 {% if line.type == "addition" %}+{% elif line.type == "deletion" %}-{% else %} {% endif %}
                                             </span>
                                             {{ line.content[1:] }}
+                                            {% for suggestion in pr_suggestions %}
+                                                {% if suggestion.filename == file.filename and suggestion.line_number == line.new_line_num %}
+                                                    <div class="pending-comment {{ suggestion.suggestion_type | lower | replace(' ', '-') }}">
+                                                        <span class="suggestion-type">{{ suggestion.suggestion_type }}</span>: 
+                                                        {{ suggestion.suggestion_text }}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
                                         </td>
                                     </tr>
                                 {% endfor %}

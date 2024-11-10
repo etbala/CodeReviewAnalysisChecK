@@ -5,6 +5,7 @@ import os
 import re
 
 from ai import get_summary
+from suggestions import get_suggestions
 
 load_dotenv()
 
@@ -101,6 +102,7 @@ def view_insights():
     repo_data = get_repo_data(owner, repo)
     pr_files = get_pr_files(owner, repo, pr_number)
 
+    pr_suggestions = get_suggestions(pr_files)
     pr_summary = get_summary(pr_files)
 
     # Extract necessary details
@@ -124,7 +126,8 @@ def view_insights():
                            pr_number=pr_number,
                            pr_link=pr_link,
                            pr_files=pr_files,
-                           pr_summary=pr_summary)
+                           pr_summary=pr_summary,
+                           pr_suggestions=pr_suggestions)
 
 if __name__ == "__main__":
     app.run(debug=False)

@@ -178,6 +178,50 @@ body {
     color: #6a737d;
 }
 
+.pending-comment {
+    background-color: rgba(55, 65, 81, 0.85);
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-style: normal;
+    color: #f1f5f9;
+    font-size: 1.05em;
+    border-radius: 6px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    border-left: 4px solid;
+}
+
+/* Colors for each suggestion type */
+.pending-comment.complexity-suggestion {
+    border-left-color: #f87171; /* Red for Complexity */
+}
+
+.pending-comment.maintainability-suggestion {
+    border-left-color: #fbbf24; /* Yellow for Maintainability */
+}
+
+.pending-comment.line-break-suggestion {
+    border-left-color: #34d399; /* Green for Line Break */
+}
+
+.pending-comment.indentation-suggestion {
+    border-left-color: #60a5fa; /* Blue for Indentation */
+}
+
+.pending-comment.nesting-suggestion {
+    border-left-color: #a78bfa; /* Purple for Nesting */
+}
+
+.pending-comment.variable-naming-suggestion {
+    border-left-color: #f472b6; /* Pink for Variable Naming */
+}
+
+.suggestion-type {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-right: 5px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
     .container {
