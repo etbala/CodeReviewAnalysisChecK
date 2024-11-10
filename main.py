@@ -4,7 +4,7 @@ import requests
 import os
 import re
 
-from ai import get_summary
+from ai import get_summary, get_scores
 
 load_dotenv()
 
@@ -102,6 +102,9 @@ def view_insights():
     pr_files = get_pr_files(owner, repo, pr_number)
 
     pr_summary = get_summary(pr_files)
+    json_scores = get_scores(pr_files)
+
+    # TODO: Instead of just putting all diff information up in the order it is given (like below), do what is told in prompt here
 
     # Extract necessary details
     org_name = repo_data.get("owner", {}).get("login", "Unknown Org")
