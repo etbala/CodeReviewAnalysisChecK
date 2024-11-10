@@ -4,4 +4,8 @@ Supercharge your code reviews by auto-flagging crucial changes and potential ris
 
 ## Run
 
-Clone the repo, run `python wsgi.py`. It's that easy.
+Clone the repo `git clone https://github.com/etbala/CodeReviewAnalysisChecK.git`
+
+`cd` into the folder, then run `pip install -r requirements.txt`
+
+Run `python wsgi.py`.
