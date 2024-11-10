@@ -3,6 +3,7 @@ import markdown
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+import json
 
 # Load environment variables
 load_dotenv()
@@ -47,3 +48,55 @@ def get_summary(pr_files):
     cleaned_summary = pr_summary.replace('\n', '<br>')
     pr_summary_html = markdown.markdown(cleaned_summary)
     return pr_summary_html
+
+def get_scores(pr_files):
+    # Format each file entry for the prompt
+    files_info = "\n".join([
+        f"Filename: {file['filename']}\nPatch:\n{file['patch']}" 
+        for file in pr_files if 'patch' in file
+    ])
+
+    prompt = f"""
+    I am providing you with a list of files modified in a pull request. For each file, assess if it contains security vulnerabilities. If a security vulnerability is found, include a one-sentence description of it. Otherwise, assign an importance score based on how critical it is that the code be reviewed, on a scale of 1 to 10 (with 10 being the most critical).
+
+    Use the following criteria to assign the importance score:
+    - Higher importance (7-10): Files that define new classes, structs, core functions, or modules that will be frequently used or have significant functionality. Also prioritize files that involve security-sensitive areas like authentication, data handling, or network communication.
+    - Medium importance (4-6): Files that contain modifications to existing code, minor functionality, or helper functions.
+    - Lower importance (1-3): Files that primarily contain imports, basic configuration, or boilerplate code that is unlikely to impact core functionality.
+
+    Output your results in JSON format with the following structure:
+    {{
+        "files": [
+            {{
+                "filename": "name_of_the_file",
+                "status": "vulnerable" or "secure",
+                "importance_score": importance_score (integer between 1 and 10),
+                "vulnerability_summary": "brief summary if vulnerable, otherwise null"
+            }},
+            ...
+        ]
+    }}
+
+    Here are the files and their diffs:
+    {files_info}
+    """
+    
+    completion = client.chat.completions.create(
+      model="gpt-4o-mini",
+      messages=[{"role": "user", "content": prompt}],
+      max_tokens=1500,
+      temperature=0.2
+    )
+
+    # Access the content directly from the response
+    result_text = completion.choices[0].message.content.strip()
+    result_json = re.sub(r"^```json|```$", "", result_text.strip(), flags=re.MULTILINE)
+
+    try:
+        result = json.loads(result_json)
+    except json.JSONDecodeError:
+        print("The response could not be parsed as JSON. Here is the raw response:")
+        print(result_json)
+        return None
+    
+    return result
