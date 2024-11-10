@@ -34,23 +34,33 @@
             {% for file in pr_files %}
                 <div class="file-diff">
                     <h4>{{ file.filename }}</h4>
-                    <p><strong>Status:</strong> {{ file.status }}</p>
-                    <p><strong>Additions:</strong> {{ file.additions }}, 
-                       <strong>Deletions:</strong> {{ file.deletions }}, 
-                       <strong>Changes:</strong> {{ file.changes }}</p>
-        
+                    <p><strong>File Status:</strong>{{ file.status }}</p>
+                    {% if file.status == "modified" %}
+                    <p><strong>Additions:</strong>{{ file.additions }} 
+                       <strong>Deletions:</strong>{{ file.deletions }} 
+                       <strong>Changes:</strong>{{ file.changes }}</p>
+                    {% endif %}
+                    
+                    <p><strong>Importance:</strong>
+                        {% if file.importance_score | default(0) >= 7 %}High
+                        {% elif file.importance_score | default(0) >= 4 %}Medium
+                        {% else %}Low
+                        {% endif %}
+                    </p>
+                    
+                    {% if file.is_vulnerable %}
+                        <div class="vulnerability-banner">
+                            <strong>Vulnerability:</strong> {{ file.vulnerability_summary }}
+                        </div>
+                    {% endif %}
+                    
                     {% if file.patch %}
                         <table class="diff-view">
                             <tbody>
                                 {% for line in file.lines %}
                                     <tr class="diff-line {{ line.type }}">
-                                        <!-- Left column for old line numbers -->
                                         <td class="line-number">{{ line.old_line_num }}</td>
-                        
-                                        <!-- Right column for new line numbers -->
                                         <td class="line-number">{{ line.new_line_num }}</td>
-                        
-                                        <!-- Line content -->
                                         <td class="line-content">
                                             <span class="line-marker">
                                                 {% if line.type == "addition" %}+{% elif line.type == "deletion" %}-{% else %} {% endif %}

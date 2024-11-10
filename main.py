@@ -102,9 +102,22 @@ def view_insights():
     pr_files = get_pr_files(owner, repo, pr_number)
 
     pr_summary = get_summary(pr_files)
-    json_scores = get_scores(pr_files)
+    scores = get_scores(pr_files)
 
-    # TODO: Instead of just putting all diff information up in the order it is given (like below), do what is told in prompt here
+    for pr_file in pr_files:
+        score_file = next((sf for sf in scores["files"] if sf["filename"] == pr_file["filename"]), {})
+        pr_file["is_vulnerable"] = score_file.get("status") == "vulnerable"
+        pr_file["importance_score"] = score_file.get("importance_score", 0)
+        pr_file["vulnerability_summary"] = score_file.get("vulnerability_summary", None)
+
+    # Sort files by vulnerability and importance score
+    pr_files.sort(
+        key=lambda x: (
+            x.get("is_vulnerable", False),  # Prioritize vulnerable files
+            x.get("importance_score", 0)
+        ),
+        reverse=True
+    )
 
     # Extract necessary details
     org_name = repo_data.get("owner", {}).get("login", "Unknown Org")
