@@ -4,7 +4,7 @@ import requests
 import os
 import re
 
-from ai import get_summary
+from ai import get_summary, get_scores
 from suggestions import get_suggestions
 
 
