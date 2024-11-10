@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
 import requests
 import os
 import re
@@ -103,9 +104,25 @@ def view_insights():
     repo_data = get_repo_data(owner, repo)
     pr_files = get_pr_files(owner, repo, pr_number)
 
-    pr_suggestions = get_suggestions(pr_files)
-    pr_summary = get_summary(pr_files)
-    scores = get_scores(pr_files)
+    # Original, Sequential Calls
+    # pr_suggestions = get_suggestions(pr_files)
+    # pr_summary = get_summary(pr_files)
+    # scores = get_scores(pr_files)
+
+    def run_calls():
+        with ThreadPoolExecutor() as executor:
+            future_suggestions = executor.submit(get_suggestions, pr_files)
+            future_summary = executor.submit(get_summary, pr_files)
+            future_scores = executor.submit(get_scores, pr_files)
+
+            # Get the results
+            pr_suggestions = future_suggestions.result()
+            pr_summary = future_summary.result()
+            scores = future_scores.result()
+
+        return pr_suggestions, pr_summary, scores
+
+    pr_suggestions, pr_summary, scores = run_calls()
 
     for pr_file in pr_files:
         score_file = next((sf for sf in scores["files"] if sf["filename"] == pr_file["filename"]), {})
