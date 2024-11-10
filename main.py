@@ -12,7 +12,7 @@ from suggestions import get_suggestions
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = "supersecretkey"
 
 GITHUB_API_URL = "https://api.github.com"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -92,7 +92,7 @@ def process_patch(patch):
 def homepage():
     return render_template('home.html')
 
-@app.route('/insights', methods=['POST'])
+@app.route('/insights')
 def view_insights():
     pr_url = request.form.get("pr_url")
     match = re.match(r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)", pr_url)
@@ -115,7 +115,7 @@ def view_insights():
             future_summary = executor.submit(get_summary, pr_files)
             future_scores = executor.submit(get_scores, pr_files)
 
-            # Get the results
+            # Missing error handling for future results
             pr_suggestions = future_suggestions.result()
             pr_summary = future_summary.result()
             scores = future_scores.result()

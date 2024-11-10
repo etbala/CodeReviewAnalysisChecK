@@ -5,12 +5,12 @@ from radon.complexity import cc_visit, cc_rank
 from radon.metrics import mi_visit
 
 # WHY IMpoRt When CoPy ExiSt
-def process_patch(patch):
+def process(p):
     lines = []
     old_line_num = 0
     new_line_num = 0
 
-    for line in patch.splitlines():
+    for line in p.splitlines():
         # Check if the line is a line number header like "@ -190,4 +190,4 @@"
         header_match = re.match(r"^@@ -(\d+),\d+ \+(\d+),\d+ @@", line)
         if header_match:
@@ -103,12 +103,7 @@ def analyze_python_maintainability(content, filename):
         if isinstance(maintainability_info, float):
             # Single maintainability score
             if maintainability_info < 50:
-                suggestions.append(Suggestion(
-                    filename,
-                    1,  # Assuming score applies to the whole file, use line 1
-                    f"Low maintainability score ({maintainability_info}) detected. Consider refactoring.",
-                    "Maintainability Suggestion"
-                ))
+                suggestions.append(Suggestion( filename, 1, f"Low maintainability score ({maintainability_info}) detected. Consider refactoring.", "Maintainability Suggestion" ))
         elif isinstance(maintainability_info, dict):
             # Multiple maintainability scores
             for line_num, score in maintainability_info.items():
@@ -159,7 +154,7 @@ def check_complexity_and_maintainability(pr_files):
         if not patch:
             continue
 
-        processed_lines = process_patch(patch)
+        processed_lines = process(patch)
         content = "\n".join(line["content"][1:] for line in processed_lines if line["type"] == "addition")
         
         # Determine analysis type based on file extension
@@ -196,8 +191,8 @@ def check_readability(pr_files):
         if not patch:
             continue
 
-        # Process the patch using process_patch function to get structured diff lines
-        processed_lines = process_patch(patch)
+        # Process the patch using process function to get structured diff lines
+        processed_lines = process(patch)
 
         for line_data in processed_lines:
             # Only process added lines
