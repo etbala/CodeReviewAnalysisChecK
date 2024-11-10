@@ -79,28 +79,50 @@ class Suggestion:
 
 def analyze_python_complexity(content, filename):
     suggestions = []
-    complexity_info = cc_visit(content)
-    for func in complexity_info:
-        if func.complexity > 10:  # Threshold for high complexity
-            suggestions.append(Suggestion(
-                filename,
-                func.lineno,
-                f"Function '{func.name}' has high cyclomatic complexity ({func.complexity}). Consider refactoring.",
-                "Complexity Suggestion"
-            ))
+    try:
+        complexity_info = cc_visit(content)
+        for func in complexity_info:
+            if func.complexity > 10:  # Threshold for high complexity
+                suggestions.append(Suggestion(
+                    filename,
+                    func.lineno,
+                    f"Function '{func.name}' has high cyclomatic complexity ({func.complexity}). Consider refactoring.",
+                    "Complexity Suggestion"
+                ))
+    except (IndentationError, SyntaxError) as e:
+        # Log or handle the error gracefully
+        print(f"Error analyzing complexity in {filename}: {e}")
     return suggestions
 
 def analyze_python_maintainability(content, filename):
     suggestions = []
-    maintainability_info = mi_visit(content)
-    for line_num, score in maintainability_info.items():
-        if score < 50:  # Low maintainability score
-            suggestions.append(Suggestion(
-                filename,
-                line_num,
-                f"Low maintainability score ({score}) detected. Consider refactoring.",
-                "Maintainability Suggestion"
-            ))
+    try:
+        maintainability_info = mi_visit(content, multi=True)  # Set multi=True for multiple code blocks
+
+        # Check if maintainability_info is a float (single score) or a dictionary (multiple scores)
+        if isinstance(maintainability_info, float):
+            # Single maintainability score
+            if maintainability_info < 50:
+                suggestions.append(Suggestion(
+                    filename,
+                    1,  # Assuming score applies to the whole file, use line 1
+                    f"Low maintainability score ({maintainability_info}) detected. Consider refactoring.",
+                    "Maintainability Suggestion"
+                ))
+        elif isinstance(maintainability_info, dict):
+            # Multiple maintainability scores
+            for line_num, score in maintainability_info.items():
+                if score < 50:
+                    suggestions.append(Suggestion(
+                        filename,
+                        line_num,
+                        f"Low maintainability score ({score}) detected. Consider refactoring.",
+                        "Maintainability Suggestion"
+                    ))
+
+    except (IndentationError, SyntaxError, TypeError) as e:
+        # Log or handle the error gracefully
+        print(f"Error analyzing maintainability in {filename}: {e}")
     return suggestions
 
 def analyze_multi_language_complexity(content, filename):
